@@ -1,6 +1,8 @@
 describe "Manager" do
   
   before do
+    $running_specs = true
+    
     MotionRecord::Manager.entity_classes = [ Project, Task ]
     MotionRecord::Manager.shared
     MotionRecord::Manager.shared.model.should.not.be.nil?
