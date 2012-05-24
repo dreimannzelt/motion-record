@@ -85,6 +85,21 @@ describe "NSManagedObject" do
   
   describe "Query" do
     
+    it "should be able to find an entity by id" do
+      project = Project.create(:title => "MyProject", :deadline => Time.new)
+      project.save
+      
+      entity = Project.find(project.objectID)
+      entity.should.not.be.nil?
+      entity.should.be.equal project
+    end
+    
+    it "should return nil if the entity id is" do
+      entity = Project.find(nil)
+      entity.should.be.nil?
+    end
+    
+    
     it "should be able to find all entites of an entity type" do
       all = Project.find_all
       all.count.should.be.equal 0

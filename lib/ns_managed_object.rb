@@ -91,20 +91,29 @@ private
     request
   end
 
-public  
+public
+  def self.find(object_id)
+    return nil if object_id.nil?
+    
+    error_ptr = Pointer.new(:object)
+    entity = MotionRecord::Manager.shared.context.existingObjectWithID(object_id, error:error_ptr)
+    puts "#{error_ptr[0]}" if entity.nil?
+    entity
+  end
+
   def self.find_all
     error_ptr = Pointer.new(:object)
     all = MotionRecord::Manager.shared.execute_fetch_request(create_request, error:error_ptr)
-    puts "#{error}" if all.nil?
+    puts "#{error_ptr[0]}" if all.nil?
     all
   end
   
   def self.find_first
-    error = Pointer.new(:object)
+    error_ptr = Pointer.new(:object)
     request = create_request
     request.fetchLimit = 1
-    all = MotionRecord::Manager.shared.execute_fetch_request(request, error:error)
-    puts "#{error}" if all.nil?
+    all = MotionRecord::Manager.shared.execute_fetch_request(request, error:error_ptr)
+    puts "#{error_ptr[0]}" if all.nil?
     all.first
   end
   
