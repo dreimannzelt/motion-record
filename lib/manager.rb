@@ -80,11 +80,13 @@ module MotionRecord
     end
   
     def create_url_for_environment
+      # we a way to know which environment is used (e.g. running specs in simulator)
       filename = 'development.sqlite'
       NSURL.fileURLWithPath(File.join(NSHomeDirectory(), 'Documents', filename)) 
     end
   
-    def store_type_for_environment  
+    def store_type_for_environment
+      # we a way to know which environment is used (e.g. running specs in simulator)
       NSSQLiteStoreType
     end
   
