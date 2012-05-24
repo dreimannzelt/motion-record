@@ -10,6 +10,10 @@ describe "Manager" do
     MotionRecord::Manager.shared.context.should.not.be.nil?
   end
   
+  after do
+    MotionRecord::Manager.shared.destroy
+  end
+  
   it "should be able to store all entity classes" do
     MotionRecord::Manager.entity_classes.should.include?(Project)
     MotionRecord::Manager.entity_classes.should.include?(Task)
