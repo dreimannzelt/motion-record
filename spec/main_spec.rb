@@ -1,4 +1,4 @@
-describe "Application 'motionrecord'" do
+describe "Application 'motion-record'" do
   before do
     @app = UIApplication.sharedApplication
   end

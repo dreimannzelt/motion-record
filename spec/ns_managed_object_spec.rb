@@ -1,0 +1,3 @@
+describe "NSManagedObject" do
+
+end
