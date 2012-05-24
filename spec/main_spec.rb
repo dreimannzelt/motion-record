@@ -1,4 +1,5 @@
 describe "Application 'motion-record'" do
+  
   before do
     @app = UIApplication.sharedApplication
   end
@@ -6,4 +7,5 @@ describe "Application 'motion-record'" do
   it "has one window" do
     @app.windows.size.should == 1
   end
+  
 end
