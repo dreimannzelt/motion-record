@@ -4,15 +4,15 @@ describe "NSManagedObject" do
     $running_specs = true
     
     MotionRecord::Manager.entity_classes = [ Project, Task ]
-    MotionRecord::Manager.shared
-    MotionRecord::Manager.shared.model.should.not.be.nil?
-    MotionRecord::Manager.shared.coordinator.should.not.be.nil?
-    MotionRecord::Manager.shared.store.should.not.be.nil?
-    MotionRecord::Manager.shared.context.should.not.be.nil?
+    MotionRecord::Manager.instance
+    MotionRecord::Manager.instance.model.should.not.be.nil?
+    MotionRecord::Manager.instance.coordinator.should.not.be.nil?
+    MotionRecord::Manager.instance.store.should.not.be.nil?
+    MotionRecord::Manager.instance.context.should.not.be.nil?
   end
   
   after do
-    MotionRecord::Manager.shared.destroy
+    MotionRecord::Manager.instance.destroy
   end
   
   describe "base entity description" do
@@ -99,17 +99,37 @@ describe "NSManagedObject" do
       entity.should.be.nil?
     end
     
-    
     it "should be able to find all entites of an entity type" do
-      all = Project.find_all
-      all.count.should.be.equal 0
+      result = Project.find_all
+      result.count.should.be.equal 0
       
       Project.create(:title => "MyProject 1", :deadline => Time.new).save
       Project.create(:title => "MyProject 2", :deadline => Time.new).save
       Project.create(:title => "MyProject 3", :deadline => Time.new).save
       
-      all = Project.find_all
-      all.count.should.be.equal 3
+      result = Project.find_all
+      result.count.should.be.equal 3
+    end
+    
+    it "should be able to find entites by NSPredicate expression" do
+      Project.create(:title => "MyProject 1", :deadline => Time.new).save
+      Project.create(:title => "Project 2", :deadline => Time.new).save
+      Project.create(:title => "MyProject 3", :deadline => Time.new).save
+      
+      result = Project.where("title LIKE 'MyProject 1' or title LIKE 'MyProject 3'")
+      result.count.should.be.equal 2
+    end
+    
+    it "should be able to find entites by a block" do
+      Project.create(:title => "MyProject 1", :deadline => Time.new).save
+      Project.create(:title => "Project 2", :deadline => Time.new).save
+      Project.create(:title => "MyProject 3", :deadline => Time.new).save
+      
+      result = Project.where do |entity|
+        puts "#{entity.description}"
+        entity.title == "MyProject 1" || entity.title == "MyProject 3"
+      end
+      result.count.should.be.equal 2
     end
     
   end

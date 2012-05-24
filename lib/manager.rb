@@ -2,26 +2,29 @@ module MotionRecord
   
   class Manager
     attr_reader :model, :coordinator, :store, :context
-  
-  public
-    def self.shared
-      @shared ||= Manager.new
-    end
 
-    def self.entity_classes
-      @@entity_classes ||= [ ]
-    end
+    class << self
+      
+      def instance
+        @instance ||= new
+      end
   
-    def self.entity_classes=(new_entity_classes)
-      @@entity_classes = new_entity_classes
-    end
+      def entity_classes
+        @@entity_classes ||= [ ]
+      end
+  
+      def entity_classes=(new_entity_classes)
+        @@entity_classes = new_entity_classes
+      end
     
-    def self.entity_for_name(name)
-      NSEntityDescription.entityForName(name.to_s, inManagedObjectContext:shared.context)
-    end
+      def entity_for_name(name)
+        NSEntityDescription.entityForName(name.to_s, inManagedObjectContext:instance.context)
+      end
   
-    def self.new_object_for_name(name)
-      NSEntityDescription.insertNewObjectForEntityForName(name.to_s, inManagedObjectContext:shared.context)
+      def new_object_for_name(name)
+        NSEntityDescription.insertNewObjectForEntityForName(name.to_s, inManagedObjectContext:instance.context)
+      end
+      
     end
     
     def save
