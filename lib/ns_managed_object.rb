@@ -15,12 +15,6 @@ class NSManagedObject
     :id            => NSObjectIDAttributeType
   }
   
-  def initialize
-    unless @@manager
-      @@manager = MotionRecord::Manager.shared
-    end
-  end
-
 	def self.entity
     @entity ||= begin
       entity = NSEntityDescription.alloc.init
@@ -38,15 +32,26 @@ class NSManagedObject
     []
   end
   
-  # Helper to create a property for an entity
+  # Property
+  
   def self.property(name, type = :undefined, optional = true, default = nil)
     property = NSAttributeDescription.alloc.init
-    property.name = name
+    property.name = name.to_s
     property.attributeType = TYPE_MAPPING[type] || TYPE_MAPPING[:undefined]
     property.optional = optional
     property.defaultValue = default
     property
   end
+  
+  def self.has_property?(name, type)
+    entity.properties.any? do |p|
+      p.is_a?(NSAttributeDescription) && 
+      p.name.to_s == name.to_s && 
+      p.attributeType == TYPE_MAPPING[type]
+    end
+  end
+  
+  # Relationship
   
   # Helper to create a one-to-one relationship for an entity
   def self.has_one(name, target, inverse = nil)
@@ -60,16 +65,21 @@ class NSManagedObject
   
   # Create
   
-  def self.create(default)
-    instance = @@manager.new_object_for_name(self.to_s)
-    
+  def self.create(values = { })
+    instance = MotionRecord::Manager.new_object_for_name(self.to_s)
+    values.each do |key, value|
+      message = "set#{key.capitalize}:"
+      if instance.respond_to?(message)
+        instance.send("#{message}", value)
+      end
+    end
     instance
   end
   
   # Delete
   
   def destroy
-    
+    MotionRecord::Manager.shared.context.deleteObject self
   end
   
   # Find
@@ -82,18 +92,18 @@ private
   end
 
 public  
-  def self.findAll
-    error = Pointer.new(:object)
-    all = @@manager.executeFetchRequest(create_request, error:error)
+  def self.find_all
+    error_ptr = Pointer.new(:object)
+    all = MotionRecord::Manager.shared.execute_fetch_request(create_request, error:error_ptr)
     puts "#{error}" if all.nil?
     all
   end
   
-  def self.findFirst
+  def self.find_first
     error = Pointer.new(:object)
     request = create_request
     request.fetchLimit = 1
-    all = @@manager.executeFetchRequest(request, error:error)
+    all = MotionRecord::Manager.shared.execute_fetch_request(request, error:error)
     puts "#{error}" if all.nil?
     all.first
   end
@@ -101,7 +111,7 @@ public
   # Save
   
   def save
-    @@manager.save
+    MotionRecord::Manager.shared.save
   end
 
 end
