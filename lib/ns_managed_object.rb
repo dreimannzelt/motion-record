@@ -16,23 +16,29 @@ class NSManagedObject
   }
   
   class << self
-    
-  	def entity
-      @entity ||= begin
-        entity = NSEntityDescription.alloc.init
-        entity.name = entity.managedObjectClassName = self.to_s
-        entity.properties = [ 
+        
+  	def entity_description
+      @entity_description ||= begin
+        desc = NSEntityDescription.alloc.init
+        desc.name = desc.managedObjectClassName = self.to_s
+        desc.properties = [ 
           property("created_at", :date, true, Time.new),  
           property("updated_at", :date, true, Time.new) 
         ] + entity_properties 
-        entity
+        desc
       end
   	end
   
     def entity_properties
       []
     end
+      
+    def has_one(name, target, inverse = nil)  
+    end
   
+    def has_many(name, target, inverse = nil)
+    end
+    
     def property(name, type = :undefined, optional = true, default = nil)
       property = NSAttributeDescription.alloc.init
       property.name = name.to_s
@@ -43,17 +49,11 @@ class NSManagedObject
     end
   
     def has_property?(name, type)
-      entity.properties.any? do |p|
+      entity_description.properties.any? do |p|
         p.is_a?(NSAttributeDescription) && 
         p.name.to_s == name.to_s && 
         p.attributeType == TYPE_MAPPING[type]
       end
-    end
-  
-    def has_one(name, target, inverse = nil)  
-    end
-  
-    def has_many(name, target, inverse = nil)
     end
   
     def create(values = { })

@@ -10,13 +10,13 @@ module MotionRecord
       end
   
       def entity_classes
-        @@entity_classes ||= [ ]
+        @entity_classes ||= [ ]
       end
-  
-      def entity_classes=(new_entity_classes)
-        @@entity_classes = new_entity_classes
+      
+      def entity_classes=(klasses)
+        @entity_classes = klasses
       end
-    
+      
       def entity_for_name(name)
         NSEntityDescription.entityForName(name.to_s, inManagedObjectContext:instance.context)
       end
@@ -52,7 +52,7 @@ module MotionRecord
     def model
       @model ||= begin
         model = NSManagedObjectModel.alloc.init
-        model.entities = Manager.entity_classes.map { |klass| klass.entity }
+        model.entities = Manager.entity_classes.map { |klass| klass.entity_description }
         model        
       end
     end

@@ -4,7 +4,6 @@ describe "NSManagedObject" do
     $running_specs = true
     
     MotionRecord::Manager.entity_classes = [ Project, Task ]
-    MotionRecord::Manager.instance
     MotionRecord::Manager.instance.model.should.not.be.nil?
     MotionRecord::Manager.instance.coordinator.should.not.be.nil?
     MotionRecord::Manager.instance.store.should.not.be.nil?
@@ -18,13 +17,13 @@ describe "NSManagedObject" do
   describe "base entity description" do
     
     it "should has a created_at property" do
-      NSManagedObject.entity.properties.any? do |property|
+      NSManagedObject.entity_description.properties.any? do |property|
         property.is_a?(NSAttributeDescription) && property.name == "created_at"
       end.should.be.equal true
     end
     
     it "should has a updated_at property" do
-      NSManagedObject.entity.properties.any? do |property|
+      NSManagedObject.entity_description.properties.any? do |property|
         property.is_a?(NSAttributeDescription) && property.name == "updated_at"
       end.should.be.equal true
     end
@@ -34,11 +33,11 @@ describe "NSManagedObject" do
   describe "subclass" do
     
     it "should use the class name as entity name" do
-      Project.entity.name.should.equal "Project"
+      Project.entity_description.name.should.equal "Project"
     end
     
     it "should use the class name as entity class name" do
-      Project.entity.managedObjectClassName.should.equal "Project"
+      Project.entity_description.managedObjectClassName.should.equal "Project"
     end
     
     it "should has it's own properties" do
