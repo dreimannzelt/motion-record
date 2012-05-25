@@ -105,9 +105,11 @@ public
       entities    
     end
     
-    def count
+    def count(expression = nil, *args)
       error_ptr = Pointer.new(:object)
-      count = MotionRecord::Manager.instance.context.countForFetchRequest(create_request, error:error_ptr)
+      request = create_request
+      request.predicate = NSPredicate.predicateWithFormat(expression, args) unless expression.nil?
+      count = MotionRecord::Manager.instance.context.countForFetchRequest(request, error:error_ptr)
       puts "#{error_ptr[0]}" if error_ptr[0].nil?
       count
     end
@@ -126,6 +128,11 @@ public
   # Save
   
   def save
+    MotionRecord::Manager.instance.save
+    self
+  end
+  
+  def save?
     MotionRecord::Manager.instance.save
   end
   

@@ -127,13 +127,18 @@ describe "NSManagedObject" do
       Project.count.should.be.equal 3
     end
     
+    it "should be able to count the number of an entity filtered by an expression" do
+      Project.create(:title => "MyProject 1", :deadline => Time.new).save
+      Project.create(:title => "Project 2", :deadline => Time.new).save
+      Project.create(:title => "MyProject 3", :deadline => Time.new).save
+      
+      Project.count("title CONTAINS[cd] 'My'").should.be.equal 2
+    end
+    
     it "should be able to sort entities by a property" do
-      first = Project.create(:title => "A", :deadline => Time.new)
-      first.save
-      second = Project.create(:title => "B", :deadline => Time.new)
-      second.save
-      three = Project.create(:title => "C", :deadline => Time.new)
-      three.save
+      first = Project.create(:title => "A", :deadline => Time.new).save
+      second = Project.create(:title => "B", :deadline => Time.new).save
+      three = Project.create(:title => "C", :deadline => Time.new).save
       
       result = Project.order(:title)
       result[0].should.be.equal first
