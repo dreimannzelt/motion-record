@@ -1,10 +1,4 @@
-class Project < NSManagedObject
-  
-  def self.entity_properties
-    [
-      property(:title, :string),
-      property(:deadline, :date)
-    ]
-  end
-  
+class Project < NSManagedObject  
+  property :title, :string
+  property :deadline, :date
 end

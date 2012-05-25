@@ -21,17 +21,11 @@ class NSManagedObject
       @entity_description ||= begin
         desc = NSEntityDescription.alloc.init
         desc.name = desc.managedObjectClassName = self.to_s
-        desc.properties = [ 
-          property("created_at", :date, true, Time.new),
-          property("updated_at", :date, true, Time.new) 
-        ] + entity_properties 
+        add_property(desc, "created_at", :date, :default => Time.new)
+        add_property(desc, "updated_at", :date, :default => Time.new)
         desc
       end
   	end
-  
-    def entity_properties
-      @entity_properties ||= []
-    end
       
     def has_one(name, target, inverse = nil)
       
@@ -41,13 +35,17 @@ class NSManagedObject
       
     end
     
-    def property(name, type = :undefined, optional = true, default = nil)
-      property = NSAttributeDescription.alloc.init
-      property.name = name.to_s
-      property.attributeType = TYPE_MAPPING[type] || TYPE_MAPPING[:undefined]
-      property.optional = optional
-      property.defaultValue = default
-      property
+    def add_property(desc, name, type = :undefined, options = {})
+      attribute = NSAttributeDescription.alloc.init
+      attribute.name          = name.to_s
+      attribute.attributeType = TYPE_MAPPING[type] || TYPE_MAPPING[:undefined]
+      attribute.defaultValue  = options[:default]
+      attribute.optional      = !options[:required]
+      desc.properties = desc.properties.arrayByAddingObject(attribute)
+    end
+
+    def property(name, type = :undefined, options = {})
+      add_property(entity_description, name, type, options)
     end
   
     def has_property?(name, type)
