@@ -3,7 +3,7 @@ describe "NSManagedObject" do
   before do
     $running_specs = true
     
-    MotionRecord::Manager.entity_classes = [ Project, Task ]
+    MotionRecord::Scheme.migrate [ Project, Task ]
     MotionRecord::Manager.instance.model.should.not.be.nil?
     MotionRecord::Manager.instance.coordinator.should.not.be.nil?
     MotionRecord::Manager.instance.store.should.not.be.nil?
