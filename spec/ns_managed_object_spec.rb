@@ -71,7 +71,7 @@ describe "NSManagedObject" do
     
   end
   
-  describe "destory" do
+  describe "destorying" do
     
     it "should be able to destroy an entity" do
       project = Project.create(:title => "MyProject", :deadline => Time.new)
@@ -82,7 +82,7 @@ describe "NSManagedObject" do
     
   end
   
-  describe "Query" do
+  describe "querying" do
     
     it "should be able to find an entity by id" do
       project = Project.create(:title => "MyProject", :deadline => Time.new)
@@ -99,14 +99,14 @@ describe "NSManagedObject" do
     end
     
     it "should be able to find all entites of an entity type" do
-      result = Project.find_all
+      result = Project.all
       result.count.should.be.equal 0
       
       Project.create(:title => "MyProject 1", :deadline => Time.new).save
       Project.create(:title => "MyProject 2", :deadline => Time.new).save
       Project.create(:title => "MyProject 3", :deadline => Time.new).save
       
-      result = Project.find_all
+      result = Project.all
       result.count.should.be.equal 3
     end
     
@@ -119,18 +119,42 @@ describe "NSManagedObject" do
       result.count.should.be.equal 2
     end
     
-    it "should be able to find entites by a block" do
+    it "should be able to count the number of an entity" do
       Project.create(:title => "MyProject 1", :deadline => Time.new).save
       Project.create(:title => "Project 2", :deadline => Time.new).save
       Project.create(:title => "MyProject 3", :deadline => Time.new).save
       
-      result = Project.where do |entity|
-        puts "#{entity.description}"
-        entity.title == "MyProject 1" || entity.title == "MyProject 3"
-      end
-      result.count.should.be.equal 2
+      Project.count.should.be.equal 3
     end
     
+    it "should be able to sort entities by a property" do
+      first = Project.create(:title => "A", :deadline => Time.new)
+      first.save
+      second = Project.create(:title => "B", :deadline => Time.new)
+      second.save
+      three = Project.create(:title => "C", :deadline => Time.new)
+      three.save
+      
+      result = Project.order(:title)
+      result[0].should.be.equal first
+      result[1].should.be.equal second
+      result[2].should.be.equal three
+    end
+    
+    it "should be able to sort entities by a property in descending order" do
+      first = Project.create(:title => "A", :deadline => Time.new)
+      first.save
+      second = Project.create(:title => "B", :deadline => Time.new)
+      second.save
+      three = Project.create(:title => "C", :deadline => Time.new)
+      three.save
+      
+      result = Project.order(:title, false)
+      result[0].should.be.equal three
+      result[1].should.be.equal second
+      result[2].should.be.equal first
+    end
+  
   end
   
 end

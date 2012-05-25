@@ -22,7 +22,7 @@ class NSManagedObject
         desc = NSEntityDescription.alloc.init
         desc.name = desc.managedObjectClassName = self.to_s
         desc.properties = [ 
-          property("created_at", :date, true, Time.new),  
+          property("created_at", :date, true, Time.new),
           property("updated_at", :date, true, Time.new) 
         ] + entity_properties 
         desc
@@ -30,13 +30,15 @@ class NSManagedObject
   	end
   
     def entity_properties
-      []
+      @entity_properties ||= []
     end
       
-    def has_one(name, target, inverse = nil)  
+    def has_one(name, target, inverse = nil)
+      
     end
   
     def has_many(name, target, inverse = nil)
+      
     end
     
     def property(name, type = :undefined, optional = true, default = nil)
@@ -68,12 +70,6 @@ class NSManagedObject
     end
   
   end
-  
-  # Delete
-  
-  def destroy
-    MotionRecord::Manager.instance.context.deleteObject self
-  end
 
 private
   def self.create_request
@@ -95,24 +91,36 @@ public
       entity
     end
 
-    def find_all
+    def all
       error_ptr = Pointer.new(:object)
       all = MotionRecord::Manager.instance.execute_fetch_request(create_request, error:error_ptr)
       puts "#{error_ptr[0]}" if all.nil?
       all
     end
   
-    def where(expression = nil, *args, &proc)
+    def where(expression = nil, *args)
       error_ptr = Pointer.new(:object)
       request = create_request
-      if block_given?
-        request.predicate = NSPredicate.predicateWithBlock(lambda { |entity, bindings| proc.call(entity) })
-      else
-        request.predicate = NSPredicate.predicateWithFormat(expression, args)
-      end
+      request.predicate = NSPredicate.predicateWithFormat(expression, args)
       entities = MotionRecord::Manager.instance.execute_fetch_request(request, error:error_ptr)
       puts "#{error_ptr[0]}" if entities.nil?
       entities    
+    end
+    
+    def count
+      error_ptr = Pointer.new(:object)
+      count = MotionRecord::Manager.instance.context.countForFetchRequest(create_request, error:error_ptr)
+      puts "#{error_ptr[0]}" if error_ptr[0].nil?
+      count
+    end
+    
+    def order(name, ascending = true)
+      error_ptr = Pointer.new(:object)
+      request = create_request
+      request.sortDescriptors = [ NSSortDescriptor.sortDescriptorWithKey(name, ascending:ascending) ]
+      entities = MotionRecord::Manager.instance.execute_fetch_request(request, error:error_ptr)
+      puts "#{error_ptr[0]}" if entities.nil?
+      entities
     end
 
   end
@@ -122,5 +130,11 @@ public
   def save
     MotionRecord::Manager.instance.save
   end
-
+  
+  # Delete
+  
+  def destroy
+    MotionRecord::Manager.instance.context.deleteObject self
+  end
+  
 end
