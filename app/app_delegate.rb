@@ -1,6 +1,6 @@
 class AppDelegate
   def application(application, didFinishLaunchingWithOptions:launchOptions)    
-    MotionRecord::Scheme.migrate [ Project, Task ]
+    MotionRecord::Scheme.migrate
     @window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
     @window.makeKeyAndVisible
     true

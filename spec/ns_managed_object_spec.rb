@@ -1,53 +1,10 @@
-describe "NSManagedObject" do
-  
-  before do
-    $running_specs = true
-    
-    MotionRecord::Scheme.migrate [ Project, Task ]
-    MotionRecord::Manager.instance.model.should.not.be.nil?
-    MotionRecord::Manager.instance.coordinator.should.not.be.nil?
-    MotionRecord::Manager.instance.store.should.not.be.nil?
-    MotionRecord::Manager.instance.context.should.not.be.nil?
-  end
-  
-  after do
-    MotionRecord::Manager.instance.destroy
-  end
-  
-  describe "base entity description" do
-    
-    it "should has a created_at property" do
-      NSManagedObject.entity_description.properties.any? do |property|
-        property.is_a?(NSAttributeDescription) && property.name == "created_at"
-      end.should.be.equal true
-    end
-    
-    it "should has a updated_at property" do
-      NSManagedObject.entity_description.properties.any? do |property|
-        property.is_a?(NSAttributeDescription) && property.name == "updated_at"
-      end.should.be.equal true
-    end
-    
-  end
-  
-  describe "subclass" do
-    
-    it "should use the class name as entity name" do
-      Project.entity_description.name.should.equal "Project"
-    end
-    
-    it "should use the class name as entity class name" do
-      Project.entity_description.managedObjectClassName.should.equal "Project"
-    end
-    
-    it "should has it's own properties" do
-      Project.should.has_property?("title", :string)
-      Project.should.has_property?("deadline", :date)
-    end
-    
-  end
+$running_specs = true
 
+describe "NSManagedObject" do
+    
   describe "creation" do
+    before do MotionRecord::Scheme.migrate end
+    after do MotionRecord::Scheme.destroy end
     
     it "should be able to create a new entity instance" do
       project = Project.create
@@ -72,6 +29,8 @@ describe "NSManagedObject" do
   end
   
   describe "destorying" do
+    before do MotionRecord::Scheme.migrate end
+    after do MotionRecord::Scheme.destroy end
     
     it "should be able to destroy an entity" do
       project = Project.create(:title => "MyProject", :deadline => Time.new)
@@ -83,6 +42,8 @@ describe "NSManagedObject" do
   end
   
   describe "querying" do
+    before do MotionRecord::Scheme.migrate end
+    after do MotionRecord::Scheme.destroy end
     
     it "should be able to find an entity by id" do
       project = Project.create(:title => "MyProject", :deadline => Time.new)

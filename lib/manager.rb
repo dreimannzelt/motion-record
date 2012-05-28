@@ -1,76 +1,37 @@
 module MotionRecord
   
   class Manager
-    attr_reader :model, :coordinator, :store, :context
 
     class << self
       
       def instance
         @instance ||= new
       end
-  
-      def entity_classes
-        @entity_classes ||= [ ]
-      end
       
-      def entity_classes=(klasses)
-        @entity_classes = klasses
+      def rebuild_core_data_stack
+        instance.destroy
+        instance.coordinator
+        instance.store
+        instance.context
       end
-      
-      def entity_for_name(name)
-        NSEntityDescription.entityForName(name.to_s, inManagedObjectContext:instance.context)
-      end
-  
-      def new_object_for_name(name)
-        NSEntityDescription.insertNewObjectForEntityForName(name.to_s, inManagedObjectContext:instance.context)
-      end
-      
+
     end
     
-    def save
-      error = Pointer.new(:object)
-      unless @context.save(error)
-        puts "Error when saving the model: #{error[0].description}"
-        return false
-      end
-      true
-    end
+  public
+    attr_reader :coordinator, :store, :context
     
-    def destroy
-      error = Pointer.new(:object)
-      @coordinator.removePersistentStore(@store, error:error)
-      unless error
-        puts "destroy: #{error[0].description}"
-      end
-      @store = nil  
-    end
-  
-    def execute_fetch_request(request, error:error)
-      @context.executeFetchRequest(request, error:error)
-    end
-      
-    def model
-      @model ||= begin
-        model = NSManagedObjectModel.alloc.init
-        model.entities = Manager.entity_classes.map { |klass| klass.entity_description }
-        model        
-      end
-    end
-  
     def coordinator
       @coordinator ||= begin
-        NSPersistentStoreCoordinator.alloc.initWithManagedObjectModel(model)
+        NSPersistentStoreCoordinator.alloc.initWithManagedObjectModel(MotionRecord::Scheme.current_model)
       end
     end
   
     def store
       @store ||= begin
         url = create_url_for_environment
-        error = Pointer.new(:object)
-        store = coordinator.addPersistentStoreWithType(store_type_for_environment, configuration:nil, URL:url, options:nil, error:error)
-        unless store
-          raise "Can't add persistent SQLite store: #{error[0].description}"
-        end
+        error_ptr = Pointer.new(:object)
+        store = coordinator.addPersistentStoreWithType(store_type_for_environment, configuration:nil, URL:url, options:nil, error:error_ptr)
+        raise "Can't add persistent SQLite store: #{error_ptr[0].description}" unless store
         store        
       end
     end
@@ -82,18 +43,46 @@ module MotionRecord
         context
       end
     end
-      
-  private
-    def initialize 
-      model
-      coordinator
-      store
-      context
+    
+    def execute_fetch_request(request, error:error)
+      context.executeFetchRequest(request, error:error)
+    end
+    
+    def entity_for_name(name)
+      raise ArgumentName, "You must provide a name" if name.nil?
+      NSEntityDescription.entityForName(name.to_s, inManagedObjectContext:context)
+    end
+    
+    def new_object_for_name(name)
+      raise ArgumentName, "You must provide a name" if name.nil?
+      NSEntityDescription.insertNewObjectForEntityForName(name.to_s, inManagedObjectContext:context)
     end
   
+    def save
+      error = Pointer.new(:object)
+      unless context.save(error)
+        puts "Error when saving the model: #{error[0].description}"
+        return false
+      end
+      true
+    end
+    
+    def destroy
+      return if @store.nil? || @coordinator.nil?
+      error_ptr = Pointer.new(:object)
+      coordinator.removePersistentStore(@store, error:error_ptr)
+      puts "destroy: #{error_ptr[0].description}" if error_ptr[0]
+      @coordinator = nil
+      @store = nil
+      @context = nil
+    end
+      
+  private
+      
     def create_url_for_environment
-      filename = $running_specs ? 'specs.sqlite' : 'development.sqlite'
-      NSURL.fileURLWithPath(File.join(NSHomeDirectory(), 'Documents', filename)) 
+      return nil if $running_specs
+      
+      NSURL.fileURLWithPath(File.join(NSHomeDirectory(), 'Documents', 'development.sqlite')) 
     end
   
     def store_type_for_environment
