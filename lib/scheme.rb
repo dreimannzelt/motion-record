@@ -2,6 +2,13 @@ module MotionRecord
 
 	class Scheme
     
+    def print_config
+      puts "$running_specs             => #{$running_specs}"
+      puts "store_type_for_environment => #{store_type_for_environment}"
+      puts "url_for_environment        => #{url_for_environment.description}"
+      puts "store_meta_data            => #{store_meta_data}"
+    end
+    
     class << self
       
       attr_accessor :current_model
@@ -33,7 +40,7 @@ module MotionRecord
             @current_model = NSManagedObjectModel.modelByMergingModels(all_migrations)
           else
             @current_model = neweset_migration
-          end          
+          end
         end
         
         MotionRecord::Manager.rebuild_core_data_stack
@@ -53,12 +60,10 @@ module MotionRecord
       end
       
       def store_meta_data
-        @store_meta_data ||= begin
-          error_ptr = Pointer.new(:object)
-          data = NSPersistentStoreCoordinator.metadataForPersistentStoreOfType(store_type_for_environment, URL:url_for_environment, error:error_ptr)
-          raise "Could not create meta data for persistent store: #{error_ptr[0].description}" if error_ptr[0]
-          data
-        end
+        error_ptr = Pointer.new(:object)
+        data = NSPersistentStoreCoordinator.metadataForPersistentStoreOfType(store_type_for_environment, URL:url_for_environment, error:error_ptr)
+        raise "Could not create meta data for persistent store: #{error_ptr[0].description}" if error_ptr[0]
+        data
       end
       
       def url_for_environment
@@ -71,7 +76,7 @@ module MotionRecord
       end
       
       def migrate_store(from_version, to_version)
-        destination_url = url_for_environment.URLByAppendingPathExtension("tmp")
+        destination_url = url_for_environment.URLByAppendingPathExtension("new")
         
         error_ptr = Pointer.new(:object)
         mapping_model = to_version.mapping_model

@@ -34,10 +34,9 @@ module MotionRecord
       
       def all_migrations
         @all_migrations ||= migration_classes.map do |klass|
-          puts "#{klass} => #{klass.version_number}"
           raise "Could not find a version in #{klass}. Please use Migration#version to define a version number." if klass.version_number.nil?
           m = klass.new
-          m.define
+          m.migrate
           m
         end
       end

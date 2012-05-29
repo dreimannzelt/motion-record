@@ -1,7 +1,7 @@
 class CreateTask < MotionRecord::Migration
   version 2
   
-  def define
+  def migrate
     create_entity :Task do |e|
       e.string    :title,   :default => ""
       e.date      :deadline

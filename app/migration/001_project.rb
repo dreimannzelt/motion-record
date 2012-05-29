@@ -1,7 +1,7 @@
 class CreateProject < MotionRecord::Migration
   version 1
   
-  def define
+  def migrate
     create_entity :Project do |e|
       e.string    :title,    :default => ""
       e.date      :deadline

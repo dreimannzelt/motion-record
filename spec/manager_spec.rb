@@ -1,5 +1,3 @@
-$running_specs = true
-
 describe "Manager" do
   
   before do

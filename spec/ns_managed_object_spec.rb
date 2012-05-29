@@ -1,5 +1,3 @@
-$running_specs = true
-
 describe "NSManagedObject" do
     
   describe "creation" do
