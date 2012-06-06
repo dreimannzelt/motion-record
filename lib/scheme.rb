@@ -14,18 +14,17 @@ module MotionRecord
       attr_accessor :current_model
             
       def migrate
-        all_migrations = MotionRecord::Migration.all_migrations
-        raise "No versions for migration found" if all_migrations.nil? || all_migrations.empty?
-        neweset_migration = MotionRecord::Migration.neweset_migration
-        
+        all_models = MotionRecord::Version.build_models
+        raise "No versions for migration found" if all_models.nil? || all_models.empty?
+        neweset_model = all_models.last
         if store_exists?
           if migration_is_needed?
-            compatible_version = all_migrations.reverse.find { |v| v.is_compatible_with?(store_meta_data) }
-            compatible_version = all_migrations.first if compatible_version.nil?
+            compatible_version = all_models.reverse.find { |v| v.is_compatible_with?(store_meta_data) }
+            compatible_version = all_models.first if compatible_version.nil?
           
-            start = all_migrations.index(compatible_version)
-            length = all_migrations.count-start
-            versions_to_migrate = all_migrations[start, length]
+            start = all_models.index(compatible_version)
+            length = all_models.count-start
+            versions_to_migrate = all_models[start, length]
           
             from_version = compatible_version
             versions_to_migrate.each do |to_version|
@@ -33,30 +32,29 @@ module MotionRecord
               from_version = to_version
             end
           else
-            @current_model = neweset_migration
+            @current_model = neweset_model
           end
         else
-          if all_migrations.count > 1
-            @current_model = NSManagedObjectModel.modelByMergingModels(all_migrations)
+          if all_models.count > 1
+            @current_model = NSManagedObjectModel.modelByMergingModels(all_models)
           else
-            @current_model = neweset_migration
+            @current_model = neweset_model
           end
         end
-        
         MotionRecord::Manager.rebuild_core_data_stack
       end
       
       def destroy
         MotionRecord::Manager.instance.destroy
       end
-      
+            
     private
       def store_exists?
         !store_meta_data.nil?   
       end
     
       def migration_is_needed?
-        !MotionRecord::Migration.neweset_migration.is_compatible_with?(store_meta_data)
+        !MotionRecord::Migration.neweset_model.is_compatible_with?(store_meta_data)
       end
       
       def store_meta_data

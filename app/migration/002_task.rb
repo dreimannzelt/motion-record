@@ -1,13 +1,15 @@
-class CreateTask < MotionRecord::Migration
-  version 2
+MotionRecord::Version.define 2 do |v|
   
-  def migrate
-    create_entity :Task do |e|
-      e.string    :title,   :default => ""
-      e.date      :deadline
-      e.timestamps
-    end
-  end
-    
-end
+  v.create_entity :Task do |e|
+    e.string    :title,   :default => ""
+    e.date      :deadline
 
+    e.has_one   :project      
+    e.timestamps
+  end
+  
+  v.entity :Project do |e|
+    e.has_many :tasks, :class => :Task
+  end
+  
+end
