@@ -102,5 +102,64 @@ public
   def destroy
     MotionRecord::Manager.instance.context.deleteObject self
   end
+  
+  def new_record?
+    committedValuesForKeys(nil).empty?
+  end
+  
+  def valid?
+    err = Pointer.new(:object)
+    v = new_record? ? validateForInsert(err) : validateForUpdate(err)
+    yield(v, err[0]) if block_given?
+    v
+  end
+  
+  def errors
+    errors = {}
+    valid? do |valid, error|
+      next if error.nil?
+      if error.code == NSValidationMultipleErrorsError
+        errs = error.userInfo[NSDetailedErrorsKey]
+        errs.each do |nserr|
+          errors[nserr.userInfo["NSValidationErrorKey"]] = message_for_error_code(nserr.code)
+        end
+      else
+        errors[error.userInfo['NSValidationErrorKey']] = message_for_error_code(error.code)
+      end
+    end
+    errors
+  end
+  
+private
+  def message_for_error_code(c)
+    message = case c
+      when NSValidationMissingMandatoryPropertyError
+        "can't be blank"
+      when NSValidationNumberTooLargeError
+        "too large"
+      when NSValidationNumberTooSmallError
+        "too small"
+      when NSValidationDateTooLateError
+        "too late"
+      when NSValidationDateTooSoonError
+        "too soon"
+      when NSValidationInvalidDateError
+        "invalid date"
+      when NSValidationStringTooLongError
+        "too long"
+      when NSValidationStringTooShortError
+        "too short"
+      when NSValidationStringPatternMatchingError
+        "incorrect pattern"
+      when NSValidationRelationshipExceedsMaximumCountError
+        "too many"
+      when NSValidationRelationshipLacksMinimumCountError
+        "too few"
+      when NSValidationRelationshipDeniedDeleteError
+        "can't delete"
+      when NSManagedObjectValidationError
+        "invalid"
+      end
+  end
     
 end
