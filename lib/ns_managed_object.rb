@@ -42,6 +42,26 @@ public
       puts "#{error_ptr[0]}" if entity.nil?
       entity
     end
+    
+    def first(name = :created_at)
+      error_ptr = Pointer.new(:object)
+      request = create_fetch_request
+      request.fetchLimit = 1
+      request.sortDescriptors = [ NSSortDescriptor.sortDescriptorWithKey(name, ascending:true) ]
+      entities = MotionRecord::Manager.instance.execute_fetch_request(request, error:error_ptr)
+      puts "#{error_ptr[0]}" if entities.nil?
+      entities.first rescue nil
+    end
+    
+    def last(name = :created_at)
+      error_ptr = Pointer.new(:object)
+      request = create_fetch_request
+      request.fetchLimit = 1
+      request.sortDescriptors = [ NSSortDescriptor.sortDescriptorWithKey(name, ascending:false) ]
+      entities = MotionRecord::Manager.instance.execute_fetch_request(request, error:error_ptr)
+      puts "#{error_ptr[0]}" if entities.nil?
+      entities.first rescue nil
+    end
 
     def all
       error_ptr = Pointer.new(:object)
