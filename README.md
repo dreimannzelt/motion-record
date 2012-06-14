@@ -13,7 +13,7 @@ Add the motion-record lib path to your project 'Rakefile'
 ```ruby
 Motion::Project::App.setup do |app|
   app.name = 'MyApp'
-  app.files.unshift(Dir.glob(File.join(app.project_dir, 'vendor/motion-record/lib/**/*.rb')))
+  app.files.unshift(*Dir.glob(File.join(app.project_dir, 'vendor/motion-record/lib/**/*.rb')))
 end
 ```
 
