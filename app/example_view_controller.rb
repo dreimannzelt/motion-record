@@ -10,7 +10,7 @@ class ExampleViewController < UIViewController
     destroy_button = UIButton.buttonWithType UIButtonTypeRoundedRect
     destroy_button.frame = [[50,150], [100,44]]
     destroy_button.setTitle("Destroy", forState:UIControlStateNormal)
-    destroy_button.addTarget(self, action:"destory", forControlEvents:UIControlEventTouchUpInside)
+    destroy_button.addTarget(self, action:"destroy", forControlEvents:UIControlEventTouchUpInside)
     view.addSubview destroy_button
 	end
   
@@ -19,7 +19,7 @@ class ExampleViewController < UIViewController
     MotionRecord::Scheme.migrate
   end
   
-  def destory
+  def destroy
     MotionRecord::Scheme.destroy
   end
 
